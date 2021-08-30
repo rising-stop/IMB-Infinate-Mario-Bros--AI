@@ -1,0 +1,10 @@
+agents/__pycache__
+client/__pycache__
+experiments/__pycache__
+tasks/__pycache__
+utils/__pycache__
+agents/.svn
+client/.svn
+experiments/.svn
+tasks/.svn
+utils/.svn
