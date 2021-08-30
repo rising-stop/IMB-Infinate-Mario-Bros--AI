@@ -46,5 +46,5 @@ class MarioEnvironment(TCPEnvironment):
         if self.fastTCP:
             argstring += "-fastTCP on"
 
-        self.client.sendData("reset -maxFPS on " +
+        self.client.sendData("reset -maxFPS off " +
                              argstring + self.otherServerArgs + "\r\n")

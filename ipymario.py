@@ -17,38 +17,39 @@ from agents.forwardrandomagent import ForwardRandomAgent
 
 def main():
     agent = ForwardAgent()
-    task = MarioTask(agent.name, initMarioMode=2)
+    # task = MarioTask(agent.name, initMarioMode=2)
+    task = MarioTask()
     exp = EpisodicExperiment(task, agent)
     print('Task Ready')
     exp.doEpisodes(2)
-    print('mm 2: %d' % task.reward)
+    print('mm 2: %f' % task.reward)
 
     task.env.initMarioMode = 1
     exp.doEpisodes(1)
-    print('mm 1: %d', task.reward)
+    print('mm 1: %f', task.reward)
 
     task.env.initMarioMode = 0
     exp.doEpisodes(1)
-    print('mm 0: %d', task.reward)
+    print('mm 0: %f', task.reward)
 
     task.env.initMarioMode = 0
     exp.doEpisodes(1)
-    print('mm 0: %d', task.reward)
+    print('mm 0: %f', task.reward)
 
     task.env.initMarioMode = 0
     task.env.levelDifficulty = 5
     exp.doEpisodes(1)
-    print('mm 0, ld 5: %d', task.reward)
+    print('mm 0, ld 5: %f', task.reward)
 
     task.env.initMarioMode = 1
     task.env.levelDifficulty = 5
     exp.doEpisodes(1)
-    print('mm 1, ld 5: %d', task.reward)
+    print('mm 1, ld 5: %f', task.reward)
 
     task.env.initMarioMode = 2
     task.env.levelDifficulty = 5
     exp.doEpisodes(1)
-    print('mm 2, ld 5: %d', task.reward)
+    print('mm 2, ld 5: %f', task.reward)
 
     print("finished")
 
