@@ -11,6 +11,9 @@ class ForwardAgent(MarioAgent):
     """
     action = None
     actionStr = None
+    KEY_LEFT = 0
+    KEY_RIGHT = 1
+    KEY_DOWN = 2
     KEY_JUMP = 3
     KEY_SPEED = 4
     levelScene = None
@@ -33,7 +36,7 @@ class ForwardAgent(MarioAgent):
         self.trueJumpCounter = 0
         self.trueSpeedCounter = 0
         self.action = numpy.zeros(5, int)
-        self.action[1] = 1
+        self.action[self.KEY_RIGHT] = 1
         self.actionStr = ""
 
     def _dangerOfGap(self):
@@ -128,30 +131,6 @@ class ForwardAgent(MarioAgent):
             self.isEpisodeOver = True
         else:
             self.mayMarioJump, self.isMarioOnGround, self.marioFloats, self.enemiesFloats, self.levelScene, dummy = obs
-        # self.printLevelScene()
-
-    def printLevelScene(self):
-        ret = ""
-        for x in range(22):
-            tmpData = ""
-            for y in range(22):
-                tmpData += self.mapElToStr(self.levelScene[x][y])
-            ret += "\n%s" % tmpData
-        print(ret)
-        print('mayMarioJump: ', self.mayMarioJump)
-        print('isMarioOnGround: ', self.isMarioOnGround)
-        print('marioFloats: ', self.marioFloats)
-        print('enemiesFloats: ', self.enemiesFloats)
-
-    def mapElToStr(self, el):
-        """maps element of levelScene to str representation"""
-        s = ""
-        if (el == 0):
-            s = "##"
-        s += "#MM#" if (el == 95) else str(el)
-        while (len(s) < 4):
-            s += "#"
-        return s + " "
 
     def printObs(self):
         """for debug"""

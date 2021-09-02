@@ -17,18 +17,17 @@ from agents.forwardrandomagent import ForwardRandomAgent
 
 def main():
     agent = ForwardAgent()
-    env = MarioEnvironment()
+    env = MarioEnvironment(is_debug=False, agentname=agent.getName())
     exp = EpisodicExperiment(env, agent)
     print('Env Ready')
-    exp.doEpisodes(2)
+    exp.doEpisodes(1)
     print('mm 2: %d' % env.getReward())
 
-    exp.doEpisodes(1)
-    print('mm 1: %d' % env.getReward())
-
+    env.setDifficulty(3)
     exp.doEpisodes(1)
     print('mm 0: %d' % env.getReward())
 
+    env.setDifficulty(4)
     exp.doEpisodes(1)
     print('mm 0: %d' % env.getReward())
 

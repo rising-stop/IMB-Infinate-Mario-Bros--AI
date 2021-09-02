@@ -12,7 +12,6 @@ class EpisodicExperiment(Experiment):
         all_rewards = []
         for dummy in range(number):
             rewards = []
-            self.stepid = 0
             # the agent is informed of the start of the episode
             self.agent.newEpisode()
             self.env.reset()
@@ -21,7 +20,6 @@ class EpisodicExperiment(Experiment):
                 rewards.append(r)
             all_rewards.append(rewards)
         return all_rewards
-
 
 # class EpisodicExperiment(Experiment):
 #    """

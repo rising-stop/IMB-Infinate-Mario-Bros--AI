@@ -8,13 +8,11 @@ from utils.dataadaptor import show
 
 class TCPEnvironment(Environment):
 
-    verbose = False
-
     # Level settings
-    _levelDifficulty = 10
+    _levelDifficulty = 1
     _levelType = 0
     _creaturesEnabled = True
-    _initMarioMode = 2
+    _initMarioMode = 0
     _levelSeed = 1
     _timeLimit = 100
     _fastTCP = False
@@ -23,19 +21,18 @@ class TCPEnvironment(Environment):
     _visualization = True
     _otherServerArgs = ""
     _numberOfFitnessValues = 5
+    _numberOfObeservationValues = 6
 
-    def __init__(self, agentName="UnnamedClient", host='localhost', port=4242, **otherargs):
+    def __init__(self, agentname='UnnamedClient', host='localhost', port=4242, **otherargs):
         """General TCP Environment"""
-        self.host = host
-        self.port = port
-        if self.verbose:
-            print("TCPENV: agentName ", agentName)
-        self.client = Client(host, port, agentName)
-        self.connected = True
+        self._host = host
+        self._port = port
+        self._client = Client(host, port, agentname)
+        self._connected = True
 
     def isAvailable(self):
         """returns the availability status of the environment"""
-        return self.connected
+        return self._connected
 
     def to_unicode_or_bust(self, obj, encoding='utf-8'):
         if not isinstance(obj, str):
@@ -46,12 +43,12 @@ class TCPEnvironment(Environment):
         """ receives an observation via tcp connection"""
         #        print "Looking forward to receive data"
 
-        data = self.client.recvData()
+        data = self._client.recvData()
         data = self.to_unicode_or_bust(data)
 
         if data == "ciao":
-            self.client.disconnect()
-            self.connected = False
+            self._client.disconnect()
+            self._connected = False
         elif len(data) > 5:
             #        print data
             #            for i in range(31):
@@ -72,7 +69,7 @@ class TCPEnvironment(Environment):
             else:
                 raise "something very dangerous happen...."
         actionStr += "\r\n"
-        self.client.sendData(actionStr)
+        self._client.sendData(actionStr)
 
     def setDifficulty(self, difficulty):
         self._levelDifficulty = difficulty
@@ -96,5 +93,5 @@ class TCPEnvironment(Environment):
         if self._fastTCP:
             argstring += "-fastTCP on"
 
-        self.client.sendData("reset -maxFPS off " +
-                             argstring + self._otherServerArgs + "\r\n")
+        self._client.sendData("reset -maxFPS off " +
+                              argstring + self._otherServerArgs + "\r\n")

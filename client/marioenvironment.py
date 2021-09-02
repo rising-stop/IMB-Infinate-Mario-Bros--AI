@@ -9,6 +9,8 @@ class MarioEnvironment(TCPEnvironment):
     """ An Environment class, wrapping access to the MarioServer, 
     and allowing interactions to a level. """
 
+    _is_debug = False
+
     # tracking cumulative reward
     _cumReward = 0
     # tracking the number of samples
@@ -18,13 +20,19 @@ class MarioEnvironment(TCPEnvironment):
     _reward = 0
     _status = 0
 
+    def __init__(self, is_debug=False, agentname='UnnamedClient', **otherargs):
+        super(MarioEnvironment, self).__init__(agentname)
+        self._is_debug = is_debug
+
     def getObservation(self):
-        obs = extractObservation(TCPEnvironment.getObservation(self))
-        if len(obs) == TCPEnvironment._numberOfFitnessValues:
-            self._reward = obs[1]
-            self._status = obs[0]
+        ob = extractObservation(TCPEnvironment.getObservation(self))
+        if len(ob) == TCPEnvironment._numberOfFitnessValues:
+            self._reward = ob[1]
+            self._status = ob[0]
             self._finished = True
-        return obs
+        if self._is_debug and len(ob) == TCPEnvironment._numberOfObeservationValues:
+            self._printLevelScene(ob)
+        return ob
 
     def performAction(self, action):
         if not self.isFinished():
@@ -42,6 +50,9 @@ class MarioEnvironment(TCPEnvironment):
         TCPEnvironment.reset(self)
         self._cumReward = 0
         self._samples = 0
+        self._finished = False
+        self._reward = 0
+        self._status = 0
 
     def getTotalReward(self):
         """ the accumulated reward since the start of the episode """
@@ -58,3 +69,26 @@ class MarioEnvironment(TCPEnvironment):
         """ a filtered mapping towards performAction of the underlying environment. """
         # by default, the cumulative reward is just the sum over the episode
         self._cumReward += self.getReward()
+
+    def _printLevelScene(self, ob):
+        ret = ""
+        for x in range(22):
+            tmpData = ""
+            for y in range(22):
+                tmpData += self._mapElToStr(ob[4][x][y])
+            ret += "\n%s" % tmpData
+        print(ret)
+        print('mayMarioJump: ', ob[0])
+        print('isMarioOnGround: ', ob[1])
+        print('marioFloats: ', ob[2])
+        print('enemiesFloats: ', ob[3])
+
+    def _mapElToStr(self, el):
+        """maps element of levelScene to str representation"""
+        s = ""
+        if (el == 0):
+            s = "##"
+        s += "#MM#" if (el == 95) else str(el)
+        while (len(s) < 4):
+            s += "#"
+        return s + " "
