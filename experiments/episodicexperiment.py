@@ -3,10 +3,11 @@ __date__ = "$May 12, 2009 11:18:19 PM$"
 
 from .experiment import Experiment
 
+
 class EpisodicExperiment(Experiment):
     """ The extension of Experiment to handle episodic tasks. """
-    
-    def doEpisodes(self, number = 1):
+
+    def doEpisodes(self, number=1):
         """ returns the rewards of each step as a list """
         all_rewards = []
         for dummy in range(number):
@@ -14,15 +15,15 @@ class EpisodicExperiment(Experiment):
             self.stepid = 0
             # the agent is informed of the start of the episode
             self.agent.newEpisode()
-            self.task.reset()
-            while not self.task.isFinished():
+            self.env.reset()
+            while not self.env.isFinished():
                 r = self._oneInteraction()
                 rewards.append(r)
             all_rewards.append(rewards)
         return all_rewards
-        
 
-#class EpisodicExperiment(Experiment):
+
+# class EpisodicExperiment(Experiment):
 #    """
 #    Documentation
 #    """
@@ -45,7 +46,7 @@ class EpisodicExperiment(Experiment):
 #                if len(obs) == 3:
 #                    self.agent.integrateObservation(obs)
 #                    self.task.performAction(self.agent.produceAction())
-#                
+#
 #            r = self.task.getReward()
 #            s = self.task.getStatus()
 #            print "Episode #%d finished with status %s, fitness %f..." % (i, self.statusStr[s], r)

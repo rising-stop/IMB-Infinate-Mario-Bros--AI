@@ -5,7 +5,7 @@ __date__ = "$Apr 30, 2009 1:46:32 AM$"
 import sys
 
 from experiments.episodicexperiment import EpisodicExperiment
-from tasks.mariotask import MarioTask
+from client.marioenvironment import MarioEnvironment
 from agents.forwardagent import ForwardAgent
 from agents.forwardrandomagent import ForwardRandomAgent
 
@@ -17,39 +17,32 @@ from agents.forwardrandomagent import ForwardRandomAgent
 
 def main():
     agent = ForwardAgent()
-    # task = MarioTask(agent.name, initMarioMode=2)
-    task = MarioTask()
-    exp = EpisodicExperiment(task, agent)
-    print('Task Ready')
+    env = MarioEnvironment()
+    exp = EpisodicExperiment(env, agent)
+    print('Env Ready')
     exp.doEpisodes(2)
-    print('mm 2: %f' % task.reward)
+    print('mm 2: %d' % env.getReward())
 
-    task.env.initMarioMode = 1
     exp.doEpisodes(1)
-    print('mm 1: %f', task.reward)
+    print('mm 1: %d' % env.getReward())
 
-    task.env.initMarioMode = 0
     exp.doEpisodes(1)
-    print('mm 0: %f', task.reward)
+    print('mm 0: %d' % env.getReward())
 
-    task.env.initMarioMode = 0
     exp.doEpisodes(1)
-    print('mm 0: %f', task.reward)
+    print('mm 0: %d' % env.getReward())
 
-    task.env.initMarioMode = 0
-    task.env.levelDifficulty = 5
+    env.setDifficulty(5)
     exp.doEpisodes(1)
-    print('mm 0, ld 5: %f', task.reward)
+    print('mm 0, ld 5: %d' % env.getReward())
 
-    task.env.initMarioMode = 1
-    task.env.levelDifficulty = 5
+    env.setDifficulty(6)
     exp.doEpisodes(1)
-    print('mm 1, ld 5: %f', task.reward)
+    print('mm 1, ld 5: %d' % env.getReward())
 
-    task.env.initMarioMode = 2
-    task.env.levelDifficulty = 5
+    env.setDifficulty(10)
     exp.doEpisodes(1)
-    print('mm 2, ld 5: %f', task.reward)
+    print('mm 2, ld 5: %f' % env.getReward())
 
     print("finished")
 

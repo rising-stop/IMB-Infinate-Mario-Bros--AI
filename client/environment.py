@@ -16,7 +16,7 @@ class Environment(object):
             We can perform actions, and access (partial) observations.
         """
 
-    def getSensors(self):
+    def getObservation(self):
         """ the currently visible state of the world (the observation may be
             stochastic - repeated calls returning different values)
             @rtype: by default, this is assumed to be a numpy array of doubles

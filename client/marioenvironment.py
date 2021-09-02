@@ -9,42 +9,52 @@ class MarioEnvironment(TCPEnvironment):
     """ An Environment class, wrapping access to the MarioServer, 
     and allowing interactions to a level. """
 
-    # Level settings
-    levelDifficulty = 0
-    levelType = 0
-    creaturesEnabled = True
-    initMarioMode = 2
-    levelSeed = 1
-    timeLimit = 100
-    fastTCP = False
+    # tracking cumulative reward
+    _cumReward = 0
+    # tracking the number of samples
+    _samples = 0
+    # reward
+    _finished = False
+    _reward = 0
+    _status = 0
 
-    # Other settings
-    visualization = True
-    otherServerArgs = ""
-    numberOfFitnessValues = 5
+    def getObservation(self):
+        obs = extractObservation(TCPEnvironment.getObservation(self))
+        if len(obs) == TCPEnvironment._numberOfFitnessValues:
+            self._reward = obs[1]
+            self._status = obs[0]
+            self._finished = True
+        return obs
 
-    def getSensors(self):
-        data = TCPEnvironment.getSensors(self)
-#        print "data: ", data
-        return extractObservation(data)
+    def performAction(self, action):
+        if not self.isFinished():
+            TCPEnvironment.performAction(self, action)
+            self._addReward()
+            self._samples += 1
+
+    def isFinished(self):
+        return self._finished
 
     def reset(self):
-        argstring = "-ld %d -lt %d -mm %d -ls %d -tl %d " % (self.levelDifficulty,
-                                                             self.levelType,
-                                                             self.initMarioMode,
-                                                             self.levelSeed,
-                                                             self.timeLimit
-                                                             )
-        if self.creaturesEnabled:
-            argstring += "-pw off "
-        else:
-            argstring += "-pw on "
-        if self.visualization:
-            argstring += "-vis on "
-        else:
-            argstring += "-vis off "
-        if self.fastTCP:
-            argstring += "-fastTCP on"
+        """ reinitialize the environment """
+        # Note: if a task needs to be reset at the start, the subclass constructor
+        # should take care of that.
+        TCPEnvironment.reset(self)
+        self._cumReward = 0
+        self._samples = 0
 
-        self.client.sendData("reset -maxFPS off " +
-                             argstring + self.otherServerArgs + "\r\n")
+    def getTotalReward(self):
+        """ the accumulated reward since the start of the episode """
+        return self._cumReward
+
+    def getReward(self):
+        """ Fitness gained on the level """
+        return self._reward
+
+    def getWinStatus(self):
+        return self._status
+
+    def _addReward(self):
+        """ a filtered mapping towards performAction of the underlying environment. """
+        # by default, the cumulative reward is just the sum over the episode
+        self._cumReward += self.getReward()

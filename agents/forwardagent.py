@@ -128,7 +128,7 @@ class ForwardAgent(MarioAgent):
             self.isEpisodeOver = True
         else:
             self.mayMarioJump, self.isMarioOnGround, self.marioFloats, self.enemiesFloats, self.levelScene, dummy = obs
-#        self.printLevelScene()
+        # self.printLevelScene()
 
     def printLevelScene(self):
         ret = ""
@@ -138,6 +138,10 @@ class ForwardAgent(MarioAgent):
                 tmpData += self.mapElToStr(self.levelScene[x][y])
             ret += "\n%s" % tmpData
         print(ret)
+        print('mayMarioJump: ', self.mayMarioJump)
+        print('isMarioOnGround: ', self.isMarioOnGround)
+        print('marioFloats: ', self.marioFloats)
+        print('enemiesFloats: ', self.enemiesFloats)
 
     def mapElToStr(self, el):
         """maps element of levelScene to str representation"""

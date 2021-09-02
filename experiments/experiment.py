@@ -5,8 +5,8 @@ class Experiment(object):
     """ An experiment matches up a task with an agent and handles their interactions.
     """
 
-    def __init__(self, task, agent):
-        self.task = task
+    def __init__(self, env, agent):
+        self.env = env
         self.agent = agent
         self.stepid = 0
 
@@ -20,9 +20,9 @@ class Experiment(object):
 
     def _oneInteraction(self):
         self.stepid += 1
-        self.agent.integrateObservation(self.task.getObservation())
+        self.agent.integrateObservation(self.env.getObservation())
 #        print "experiment.py self.agent.getAction(): ", self.agent.getAction(), "\n"
-        self.task.performAction(self.agent.getAction())
-        reward = self.task.getReward()
+        self.env.performAction(self.agent.getAction())
+        reward = self.env.getReward()
         self.agent.giveReward(reward)
         return reward

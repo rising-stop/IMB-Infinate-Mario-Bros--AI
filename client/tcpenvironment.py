@@ -5,9 +5,24 @@ from .client import Client
 from .environment import Environment
 from utils.dataadaptor import show
 
+
 class TCPEnvironment(Environment):
 
     verbose = False
+
+    # Level settings
+    _levelDifficulty = 10
+    _levelType = 0
+    _creaturesEnabled = True
+    _initMarioMode = 2
+    _levelSeed = 1
+    _timeLimit = 100
+    _fastTCP = False
+
+    # Other settings
+    _visualization = True
+    _otherServerArgs = ""
+    _numberOfFitnessValues = 5
 
     def __init__(self, agentName="UnnamedClient", host='localhost', port=4242, **otherargs):
         """General TCP Environment"""
@@ -27,7 +42,7 @@ class TCPEnvironment(Environment):
             obj = str(obj, 'utf-8')
         return obj
 
-    def getSensors(self):
+    def getObservation(self):
         """ receives an observation via tcp connection"""
         #        print "Looking forward to receive data"
 
@@ -58,3 +73,28 @@ class TCPEnvironment(Environment):
                 raise "something very dangerous happen...."
         actionStr += "\r\n"
         self.client.sendData(actionStr)
+
+    def setDifficulty(self, difficulty):
+        self._levelDifficulty = difficulty
+
+    def reset(self):
+        argstring = "-ld %d -lt %d -mm %d -ls %d -tl %d " % (self._levelDifficulty,
+                                                             self._levelType,
+                                                             self._initMarioMode,
+                                                             self._levelSeed,
+                                                             self._timeLimit
+                                                             )
+        argstring += "-zm 0 "
+        if self._creaturesEnabled:
+            argstring += "-pw off "
+        else:
+            argstring += "-pw on "
+        if self._visualization:
+            argstring += "-vis on "
+        else:
+            argstring += "-vis off "
+        if self._fastTCP:
+            argstring += "-fastTCP on"
+
+        self.client.sendData("reset -maxFPS off " +
+                             argstring + self._otherServerArgs + "\r\n")
