@@ -1,1 +1,2 @@
-__all__=['forwardagent.py','forwardrandomagent.py','marioagent.py']
+__all__ = ['forwardagent.py', 'forwardrandomagent.py',
+           'marioagent.py', 'mactsagent.py']
