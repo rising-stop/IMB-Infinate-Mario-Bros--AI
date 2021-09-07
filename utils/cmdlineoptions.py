@@ -3,8 +3,6 @@ import sys
 import getopt
 from agents.forwardagent import ForwardAgent
 from agents.forwardrandomagent import ForwardRandomAgent
-__author__ = "Sergey Karakovskiy, sergey at idsia fullstop ch"
-__date__ = "$May 13, 2009 3:44:46 AM$"
 
 if __name__ == "__main__":
     print("This is a module to be imported rather than run")

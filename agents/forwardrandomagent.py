@@ -1,7 +1,4 @@
 import random
-__author__ = "Sergey Karakovskiy, sergey at idsia fullstop ch"
-__date__ = "$Apr 30, 2009 6:46:04 PM$"
-
 from .marioagent import MarioAgent
 
 

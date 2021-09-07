@@ -1,6 +1,4 @@
 #!/usr/bin/python
-__author__ = "Sergey Karakovskiy, sergey at idsia dot ch"
-__date__ = "$Apr 30, 2009 1:46:32 AM$"
 
 import sys
 
@@ -17,13 +15,13 @@ from agents.forwardrandomagent import ForwardRandomAgent
 
 def main():
     agent = ForwardAgent()
-    env = MarioEnvironment(is_debug=False, agentname=agent.getName())
+    env = MarioEnvironment(is_debug=True, agentname=agent.getName())
     exp = EpisodicExperiment(env, agent)
     print('Env Ready')
     exp.doEpisodes(1)
     print('mm 2: %d' % env.getReward())
 
-    env.setDifficulty(3)
+    env.setDifficulty(0)
     exp.doEpisodes(1)
     print('mm 0: %d' % env.getReward())
 

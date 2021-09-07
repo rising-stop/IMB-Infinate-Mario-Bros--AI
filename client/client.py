@@ -1,8 +1,5 @@
 import sys
 import socket
-__author__ = "Sergey Karakovskiy, sergey at idsia fullstop ch"
-__date__ = "$May 1, 2009 9:02:32 AM$"
-
 
 class Client:
     """

@@ -1,5 +1,3 @@
-__author__="Sergey Karakovskiy, sergey at idsia fullstop ch"
-__date__ ="$May 2, 2009 7:54:12 PM$"
 
 class MarioAgent:
 #    class MarioAgent(Agent):

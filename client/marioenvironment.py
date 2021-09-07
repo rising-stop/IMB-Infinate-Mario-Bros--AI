@@ -1,5 +1,3 @@
-__author__ = "Sergey Karakovskiy, sergey at idsia fullstop ch"
-__date__ = "$May 13, 2009 1:29:41 AM$"
 
 from .tcpenvironment import TCPEnvironment
 from utils.dataadaptor import extractObservation
@@ -75,7 +73,10 @@ class MarioEnvironment(TCPEnvironment):
         for x in range(22):
             tmpData = ""
             for y in range(22):
-                tmpData += self._mapElToStr(ob[4][x][y])
+                if x == 11 and y == 11:
+                    tmpData += self._mapElToStr(1)
+                else:
+                    tmpData += self._mapElToStr(ob[4][x][y])
             ret += "\n%s" % tmpData
         print(ret)
         print('mayMarioJump: ', ob[0])

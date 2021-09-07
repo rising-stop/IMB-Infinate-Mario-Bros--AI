@@ -1,5 +1,3 @@
-__author__ = "Sergey Karakovskiy, sergey at idsia fullstop ch"
-__date__ = "$May 13, 2009 1:25:30 AM$"
 
 from .client import Client
 from .environment import Environment
@@ -81,7 +79,7 @@ class TCPEnvironment(Environment):
                                                              self._levelSeed,
                                                              self._timeLimit
                                                              )
-        argstring += "-zm 0 "
+        argstring += "-zm 1 "
         if self._creaturesEnabled:
             argstring += "-pw off "
         else:

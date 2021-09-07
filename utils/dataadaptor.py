@@ -1,5 +1,3 @@
-__author__ = "Sergey Karakovskiy, sergey at idsia fullstop ch"
-__date__ = "$Apr 30, 2009 1:53:54 PM$"
 
 import numpy
 

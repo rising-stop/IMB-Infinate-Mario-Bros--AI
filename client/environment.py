@@ -1,6 +1,3 @@
-__author__="Sergey Karakovskiy, sergey at idsia fullstop ch"
-__date__ ="$May 1, 2009 3:05:27 AM$"
-
 class Environment(object):
     """
     Environment class stores the observations and receives the actions

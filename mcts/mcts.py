@@ -8,18 +8,7 @@ class BaseAction:
     def dimension(self):
         raise 'Not implement'
 
-    def next_action(self, actions):
-        raise self._random_action(actions)
-
-    def _random_action(self, actions):
-        unused_action = []
-        for action in self._action_set():
-            if action in actions:
-                continue
-            unused_action.append(action)
-        return random.choice(unused_action)
-
-    def _action_set(self):
+    def action_set(self):
         raise 'Not implement'
 
 
@@ -58,8 +47,14 @@ class Node:
     def expand(self):
         if self.is_fully_expand():
             raise 'expand: node is full'
-        new_action = self._action.next_action(
-            [c._action for c in self._childs])
+
+        actions = [c._action for c in self._childs]
+        unused_action = []
+        for action in self._action().action_set():
+            if action in actions:
+                continue
+            unused_action.append(action)
+        new_action = random.choice(unused_action)
         self._childs.append(Node(new_action, self))
 
 
