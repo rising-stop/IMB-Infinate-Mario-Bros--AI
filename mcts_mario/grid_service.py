@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 SCENE_SIZE = 22
 
 
@@ -50,8 +49,10 @@ class GridService():
                     self._local_scene[row][col] = SceneType.KIND_UNPASSABLE
 
     def grid_match(self, mariofloats, enemyfloats):
-        return [self.MARIO_X_POSITION + int((enemyfloats[1] - mariofloats[0])/self.GRID_SIZE),
-                self.MARIO_Y_POSITION + int((enemyfloats[2] - mariofloats[1])/self.GRID_SIZE)]
+        return [self.MARIO_X_POSITION + round((enemyfloats[0] - mariofloats[0])/self.GRID_SIZE),
+                self.MARIO_Y_POSITION + round((enemyfloats[1] - mariofloats[1])/self.GRID_SIZE)]
 
-    def grid_distance(self, grid):
-        pass
+    def is_blocked(self, status, grid_action):
+        return self._local_scene[status.grid_position()[0] +
+                                 grid_action[0]][status.grid_position()[1] +
+                                                 grid_action[1]] != SceneType.KIND_NONE

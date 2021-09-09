@@ -40,10 +40,8 @@ class TCPEnvironment(Environment):
     def getObservation(self):
         """ receives an observation via tcp connection"""
         #        print "Looking forward to receive data"
-
         data = self._client.recvData()
         data = self.to_unicode_or_bust(data)
-
         if data == "ciao":
             self._client.disconnect()
             self._connected = False
@@ -89,7 +87,13 @@ class TCPEnvironment(Environment):
         else:
             argstring += "-vis off "
         if self._fastTCP:
-            argstring += "-fastTCP on"
+            argstring += "-fastTCP off"
 
         self._client.sendData("reset -maxFPS off " +
                               argstring + self._otherServerArgs + "\r\n")
+
+    def pause_game(self):
+        self._client.sendData("-pw on " + "\r\n")
+
+    def resume_game(self):
+        self._client.sendData("-pw off " + "\r\n")

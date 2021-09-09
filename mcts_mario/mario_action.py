@@ -1,17 +1,14 @@
 from mcts.mcts import BaseAction
+from .mario_status import StatusProvider
+from .mario_status import ACTION
 import numpy
 
-KEY_LEFT = 1 << 0
-KEY_RIGHT = 1 << 1
-# KEY_DOWN = 1 << 2
-KEY_JUMP = 1 << 3
-KEY_SPEED = 1 << 4
 
-ground_action_set = (KEY_LEFT, KEY_RIGHT, KEY_JUMP, KEY_SPEED,
-                     KEY_LEFT + KEY_SPEED, KEY_RIGHT + KEY_SPEED)
+ground_action_set = (ACTION.LEFT, ACTION.RIGHT, ACTION.JUMP,
+                     ACTION.JUMP_LEFT, ACTION.JUMP_RIGHT)
 
-air_action_set = (KEY_LEFT, KEY_RIGHT, KEY_SPEED,
-                  KEY_LEFT + KEY_SPEED, KEY_RIGHT + KEY_SPEED)
+air_action_set = (ACTION.LEFT, ACTION.RIGHT,
+                  ACTION.JUMP_LEFT, ACTION.JUMP_RIGHT)
 
 
 class MarioAction(BaseAction):
@@ -19,10 +16,10 @@ class MarioAction(BaseAction):
     _action = 0
     _on_ground = False
 
-    def __init__(self, action, on_ground):
+    def __init__(self, action):
         super().__init__()
         self._action = action._action
-        self._on_ground = on_ground
+        self._on_ground = StatusProvider.mario_status().on_ground()
 
     def dimension(self):
         if self._on_ground:

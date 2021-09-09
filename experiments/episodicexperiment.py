@@ -1,9 +1,19 @@
-
+from pynput.keyboard import Key, Listener
+import time
 from .experiment import Experiment
-
 
 class EpisodicExperiment(Experiment):
     """ The extension of Experiment to handle episodic tasks. """
+
+    _paused = False
+
+    def __init__(self, env, agent):
+        super().__init__(env, agent)
+        self._key_listener = Listener(on_press = self._key_pause)
+        self._key_listener.start()
+
+    def __del__(self):
+        self._key_listener.stop()
 
     def doEpisodes(self, number=1):
         """ returns the rewards of each step as a list """
@@ -14,10 +24,21 @@ class EpisodicExperiment(Experiment):
             self.agent.newEpisode()
             self.env.reset()
             while not self.env.isFinished():
-                r = self._oneInteraction()
-                rewards.append(r)
+                if self._paused:
+                    time.sleep(0.1)
+                else:
+                    r = self._oneInteraction()
+                    rewards.append(r)
             all_rewards.append(rewards)
         return all_rewards
+
+    def _key_pause(self, key):
+        if key == Key.space:
+            self._paused = ~self._paused
+        # if self._paused:
+        #     self.env.pause_game()
+        # else:
+        #     self.env.resume_game()
 
 # class EpisodicExperiment(Experiment):
 #    """

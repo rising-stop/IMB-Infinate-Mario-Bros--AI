@@ -121,10 +121,18 @@ class ForwardAgent(MarioAgent):
             self.action[self.KEY_JUMP] = 0
 
         self.action[self.KEY_SPEED] = danger
+
+        self.action[1] = 0
+        if self.mayMarioJump:
+            self.action[3] = 1
+        elif self.isMarioOnGround:
+            self.action[3] = 0
         return self.action
 
     def integrateObservation(self, obs):
         """This method stores the observation inside the agent"""
+        if obs is None:
+            return
         if (len(obs) != 6):
             self.isEpisodeOver = True
         else:

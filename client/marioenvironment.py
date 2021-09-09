@@ -1,7 +1,8 @@
 
 from .tcpenvironment import TCPEnvironment
 from utils.dataadaptor import extractObservation
-
+from mcts_mario.mario_status import StatusProvider
+from mcts_mario.world_engine import WorldEngine
 
 class MarioEnvironment(TCPEnvironment):
     """ An Environment class, wrapping access to the MarioServer, 
@@ -24,17 +25,25 @@ class MarioEnvironment(TCPEnvironment):
 
     def getObservation(self):
         ob = extractObservation(TCPEnvironment.getObservation(self))
+        if ob is None:
+            return None
         if len(ob) == TCPEnvironment._numberOfFitnessValues:
             self._reward = ob[1]
             self._status = ob[0]
             self._finished = True
-        if self._is_debug and len(ob) == TCPEnvironment._numberOfObeservationValues:
-            self._printLevelScene(ob)
+        if  len(ob) == TCPEnvironment._numberOfObeservationValues:
+            StatusProvider.update(ob)
+            if self._is_debug:
+                self._printLevelScene(ob)
+                StatusProvider.debug_info()
         return ob
 
     def performAction(self, action):
         if not self.isFinished():
             TCPEnvironment.performAction(self, action)
+            if self._is_debug:
+                print('action: ', action)
+                WorldEngine.simulate(action)
             self._addReward()
             self._samples += 1
 
@@ -79,10 +88,6 @@ class MarioEnvironment(TCPEnvironment):
                     tmpData += self._mapElToStr(ob[4][x][y])
             ret += "\n%s" % tmpData
         print(ret)
-        print('mayMarioJump: ', ob[0])
-        print('isMarioOnGround: ', ob[1])
-        print('marioFloats: ', ob[2])
-        print('enemiesFloats: ', ob[3])
 
     def _mapElToStr(self, el):
         """maps element of levelScene to str representation"""
