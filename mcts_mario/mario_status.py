@@ -28,6 +28,8 @@ class ACTION(Enum):
                 sum += 1 << i
         return ACTION(sum)
 
+previous_action = ACTION.NONE
+
 class GameStatus(object):
     def update(self, incomming):
         raise 'Not implement'
@@ -50,9 +52,13 @@ class MarioStatus(GameStatus):
         self._grid_service = grid
 
     def update(self, incomming):
-        jump_chance = self._status['jump_chance']
+        
         if incomming[0] and incomming[1]:
             jump_chance = self.JUMP_HEIGHT
+        elif previous_action.value & KEY_JUMP:
+            jump_chance = max(0, self._status['jump_chance'] - 1)
+        else:
+            jump_chance = 0
 
         self._status = {
             'may_jump': incomming[0],
@@ -118,27 +124,35 @@ class EnemyStatus(GameStatus):
         print('enemy info', self._enemy_list)
 
 
-grid_service = GridService()
-mario_status = MarioStatus(grid_service)
-enemy_status = EnemyStatus(grid_service)
-
-
 class StatusProvider(GameStatus):
 
+    __grid_service = GridService()
+    __mario_status = MarioStatus(__grid_service)
+    __enemy_status = EnemyStatus(__grid_service)
+
     def update(incomming):
-        grid_service.update(incomming[4])
-        mario_status.update([incomming[0], incomming[1], incomming[2]])
-        enemy_status.update([incomming[2], incomming[3]])
+        StatusProvider.grid_service().update(incomming[4])
+        StatusProvider.mario_status().update([incomming[0], incomming[1], incomming[2]])
+        StatusProvider.enemy_status().update([incomming[2], incomming[3]])
 
     def mario_status():
-        return mario_status
+        return StatusProvider.__mario_status
 
     def enemy_status():
-        return enemy_status
+        return StatusProvider.__enemy_status
 
     def grid_service():
-        return grid_service
+        return StatusProvider.__grid_service
+
+    def set_previous_action(action):
+        global previous_action
+        previous_action = action
+
+    def previous_action():
+        global previous_action
+        return previous_action
 
     def debug_info():
-        mario_status.debug_info()
-        enemy_status.debug_info()
+        StatusProvider.__grid_service.debug_info()
+        StatusProvider.__mario_status.debug_info()
+        StatusProvider.__enemy_status.debug_info()

@@ -1,7 +1,8 @@
 
+from os import stat
 from .tcpenvironment import TCPEnvironment
 from utils.dataadaptor import extractObservation
-from mcts_mario.mario_status import StatusProvider
+from mcts_mario.mario_status import ACTION, StatusProvider
 from mcts_mario.world_engine import WorldEngine
 
 class MarioEnvironment(TCPEnvironment):
@@ -34,12 +35,12 @@ class MarioEnvironment(TCPEnvironment):
         if  len(ob) == TCPEnvironment._numberOfObeservationValues:
             StatusProvider.update(ob)
             if self._is_debug:
-                self._printLevelScene(ob)
                 StatusProvider.debug_info()
         return ob
 
     def performAction(self, action):
         if not self.isFinished():
+            StatusProvider.set_previous_action(ACTION.parse_action(action))
             TCPEnvironment.performAction(self, action)
             if self._is_debug:
                 print('action: ', action)
@@ -76,25 +77,3 @@ class MarioEnvironment(TCPEnvironment):
         """ a filtered mapping towards performAction of the underlying environment. """
         # by default, the cumulative reward is just the sum over the episode
         self._cumReward += self.getReward()
-
-    def _printLevelScene(self, ob):
-        ret = ""
-        for x in range(22):
-            tmpData = ""
-            for y in range(22):
-                if x == 11 and y == 11:
-                    tmpData += self._mapElToStr(1)
-                else:
-                    tmpData += self._mapElToStr(ob[4][x][y])
-            ret += "\n%s" % tmpData
-        print(ret)
-
-    def _mapElToStr(self, el):
-        """maps element of levelScene to str representation"""
-        s = ""
-        if (el == 0):
-            s = "##"
-        s += "#MM#" if (el == 95) else str(el)
-        while (len(s) < 4):
-            s += "#"
-        return s + " "

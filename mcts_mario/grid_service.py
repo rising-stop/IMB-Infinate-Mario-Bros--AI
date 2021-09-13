@@ -42,10 +42,10 @@ class GridService():
     def update(self, incomming):
         for row in range(SCENE_SIZE):
             for col in range(SCENE_SIZE):
-                if incomming[row][col] in SceneType._value2member_map_:
+                if incomming[col][row] in SceneType._value2member_map_:
                     self._local_scene[row][col] = SceneType(
-                        incomming[row][col])
-                elif incomming[row][col] < 0:
+                        incomming[col][row])
+                elif incomming[col][row] < 0:
                     self._local_scene[row][col] = SceneType.KIND_UNPASSABLE
 
     def grid_match(self, mariofloats, enemyfloats):
@@ -56,3 +56,25 @@ class GridService():
         return self._local_scene[status.grid_position()[0] +
                                  grid_action[0]][status.grid_position()[1] +
                                                  grid_action[1]] != SceneType.KIND_NONE
+
+    def debug_info(self):
+        ret = ""
+        for y in range(22):
+            tmpData = ""
+            for x in range(22):
+                if x == 11 and y == 11:
+                    tmpData += self.__mapElToStr(1)
+                else:
+                    tmpData += self.__mapElToStr(self._local_scene[x][y].value)
+            ret += "\n%s" % tmpData
+        print(ret)
+
+    def __mapElToStr(self, el):
+        """maps element of levelScene to str representation"""
+        s = ""
+        if (el == 0):
+            s = "##"
+        s += "#MM#" if (el == 95) else str(el)
+        while (len(s) < 4):
+            s += "#"
+        return s + " "

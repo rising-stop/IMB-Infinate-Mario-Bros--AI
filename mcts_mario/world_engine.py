@@ -31,7 +31,8 @@ class WorldEngine:
             WorldEngine._try_jump(status, action)
         elif status.jump_chance() == 0:
             # case 2: falling phase
-            status.grid_position()[1] += 1
+            if not StatusProvider.grid_service().is_blocked(status, [0, 1]):
+                status.grid_position()[1] += 1
 
         # status update
         if StatusProvider.grid_service().is_blocked(status, [0, 1]):

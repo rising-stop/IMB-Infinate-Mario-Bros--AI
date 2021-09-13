@@ -24,6 +24,8 @@ class ForwardAgent(MarioAgent):
     trueJumpCounter = 0
     trueSpeedCounter = 0
 
+    _jump_counter = 0
+
     def reset(self):
         self.isEpisodeOver = False
         self.trueJumpCounter = 0
@@ -123,10 +125,12 @@ class ForwardAgent(MarioAgent):
         self.action[self.KEY_SPEED] = danger
 
         self.action[1] = 0
-        if self.mayMarioJump:
+        if self.mayMarioJump or self._jump_counter < 2:
             self.action[3] = 1
+            self._jump_counter += 1
         elif self.isMarioOnGround:
             self.action[3] = 0
+            self._jump_counter = 0
         return self.action
 
     def integrateObservation(self, obs):

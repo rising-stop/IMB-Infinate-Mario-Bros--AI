@@ -48,63 +48,56 @@ class Node:
         if self.is_fully_expand():
             raise 'expand: node is full'
 
-        actions = [c._action for c in self._childs]
-        unused_action = []
         for action in self._action().action_set():
-            if action in actions:
-                continue
-            unused_action.append(action)
-        new_action = random.choice(unused_action)
-        self._childs.append(Node(new_action, self))
+            self._childs.append(Node(action, self))
 
+    def reward(self):
+        return self._state.reward
+
+    def evalue(self):
+        raise 'Not implement'
 
 class MCTS:
 
-    _max_move = 1000
-    _max_search_time = 10
+    __max_move = 1000
+    __max_search_time = 10
 
     def __init__(self, root, max_move=1000, max_time=10):
-        self._root = root
-        self._max_move = max_move
-        self._max_search_time = max_time
+        self.__root = root
+        self.__max_move = max_move
+        self.__max_search_time = max_time
 
     def search(self):
-        for itr in range(int(self._max_move)):
-            trial_node = self._tree_policy(self._root)
-            local_reward = self._default_policy(trial_node.state)
-            self._backup(trial_node, local_reward)
-        return self._best_child()
+        for itr in range(int(self.__max_move)):
+            trial_node = self.__tree_policy(self.__root)
+            local_reward = self.__default_policy(trial_node.state)
+            self.__backup(trial_node, local_reward)
+        return self.__best_child()
 
-    def _tree_policy(self, node):
+    def __tree_policy(self, node):
         while node.state.terminal() == False:
             if len(node.children) == 0:
-                return node.expand()
-            elif random.uniform(0, 1) < .5:
-                node = self._best_child(node)
+                node.expand()
+                node = self.__best_child(node)
+                break
             else:
-                if node.is_fully_expand() == False:
-                    return node.expand()
-                else:
-                    node = self._best_child(node)
+                node = self.__best_child(node)
         return node
 
-    def _default_policy(self, state):
+    def __default_policy(self, state):
         while state.is_terminal() == False:
             state = state.random_next_state()
         return state.reward()
 
-    def _backup(self, node, reward):
+    def __backup(self, node, reward):
         while node != None:
             node.update(reward)
 
-    def _expand(self, node):
-        raise 'Not implement'
-
-    def _best_child(self, node):
+    def __best_child(self, node):
         bestscore = 0.0
         bestchildren = []
         for c in node.children:
-            score = self._node_score(c)
+            score = node.evalue()
             if score == bestscore:
                 bestchildren.append(c)
             if score > bestscore:
@@ -112,5 +105,3 @@ class MCTS:
                 bestscore = score
         return random.choice(bestchildren)
 
-    def _node_score(self):
-        raise 'Not implement'

@@ -7,37 +7,36 @@ import numpy
 ground_action_set = (ACTION.LEFT, ACTION.RIGHT, ACTION.JUMP,
                      ACTION.JUMP_LEFT, ACTION.JUMP_RIGHT)
 
-air_action_set = (ACTION.LEFT, ACTION.RIGHT,
-                  ACTION.JUMP_LEFT, ACTION.JUMP_RIGHT)
+air_action_set = (ACTION.LEFT, ACTION.RIGHT)
 
 
 class MarioAction(BaseAction):
 
-    _action = 0
-    _on_ground = False
+    __action = ACTION.NONE
+    __can_jump = False
 
     def __init__(self, action):
         super().__init__()
-        self._action = action._action
-        self._on_ground = StatusProvider.mario_status().on_ground()
+        self.__action = action._action
+        self.__can_jump = StatusProvider.mario_status().jump_chance() != 0
 
     def dimension(self):
-        if self._on_ground:
+        if self.__can_jump:
             return len(ground_action_set)
         return len(air_action_set)
 
     def action_set(self):
-        if self._on_ground:
+        if self.__can_jump:
             return ground_action_set
         return air_action_set
 
     def __eq__(self, ins):
-        return self._action == ins._action and self._on_ground == ins._on_ground
+        return self.__action == ins.__action and self.__can_jump == ins.__can_jump
 
     def encode(self):
         command = numpy.zeros(5, int)
         for i in range(5):
-            if self._action & 1 << i:
+            if self.__action & 1 << i:
                 command[i] = 1
         return command
 
@@ -46,4 +45,4 @@ class MarioAction(BaseAction):
             raise 'protocal error'
         for i in range(5):
             if tele_action[i] == 1:
-                self._action += 1 << i
+                self.__action += 1 << i
