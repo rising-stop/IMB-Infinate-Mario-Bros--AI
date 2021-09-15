@@ -1,61 +1,43 @@
 import random
-
-
-class BaseAction:
-    def __init__(self):
-        pass
-
-    def dimension(self):
-        raise 'Not implement'
-
-    def action_set(self):
-        raise 'Not implement'
-
-
-class BaseState:
-    def is_terminal(self):
-        raise 'Not implement'
-
-    def reward(self):
-        raise 'Not implement'
-
-    def next_state(self, action):
-        raise 'Not implement'
+from .mario_action import *
+from mario_game.world_engine import *
 
 
 class Node:
 
-    _childs = []
+    __childs = []
 
     def __init__(self, state, action, parent=None):
-        self._visits = 1
-        self._reward = 0.0
-        self._action = action
-        self._parent = parent
-        self._state = state.next_state(action)
+        self.__visits = 1
+        self.__reward = 0.0
+        self.__action = action
+        self.__parent = parent
+        self.__state = state
 
     def parent(self):
-        return self._parent
+        return self.__parent
 
     def update(self, reward):
-        self._reward += reward
-        self._visits += 1
+        self.__reward += reward
+        self.__visits += 1
 
-    def is_fully_expand(self):
-        return len(self._childs == self._action.dimension())
+    def is_expand(self):
+        return len(self.__childs) != 0
 
     def expand(self):
-        if self.is_fully_expand():
+        if self.is_expand():
             raise 'expand: node is full'
 
-        for action in self._action().action_set():
-            self._childs.append(Node(action, self))
+        for action in self.__action().action_set():
+            self.__childs.append(
+                Node(SimulationProvider.step(self.__state, action), action, self))
 
     def reward(self):
-        return self._state.reward
+        return self.__state.reward()
 
     def evalue(self):
         raise 'Not implement'
+
 
 class MCTS:
 
@@ -76,7 +58,7 @@ class MCTS:
 
     def __tree_policy(self, node):
         while node.state.terminal() == False:
-            if len(node.children) == 0:
+            if node.is_fully_expand():
                 node.expand()
                 node = self.__best_child(node)
                 break
@@ -85,9 +67,7 @@ class MCTS:
         return node
 
     def __default_policy(self, state):
-        while state.is_terminal() == False:
-            state = state.random_next_state()
-        return state.reward()
+        raise 'Not implement'
 
     def __backup(self, node, reward):
         while node != None:
@@ -104,4 +84,3 @@ class MCTS:
                 bestchildren = [c]
                 bestscore = score
         return random.choice(bestchildren)
-

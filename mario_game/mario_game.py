@@ -1,7 +1,7 @@
 from numpy.core.getlimits import iinfo
 from .grid_service import GridService
 from .grid_service import EnemyType
-from .grid_service import SceneType
+from .grid_service import MarioScene
 import math
 from enum import Enum
 
@@ -28,7 +28,9 @@ class ACTION(Enum):
                 sum += 1 << i
         return ACTION(sum)
 
+
 previous_action = ACTION.NONE
+
 
 class GameStatus(object):
     def update(self, incomming):
@@ -39,7 +41,7 @@ class MarioStatus(GameStatus):
 
     JUMP_HEIGHT = 3
 
-    _status = {
+    __status = {
         'may_jump': True,
         'on_ground': True,
         'jump_chance': JUMP_HEIGHT,
@@ -48,52 +50,39 @@ class MarioStatus(GameStatus):
         'grid': [0, 0]
     }
 
-    def __init__(self, grid):
-        self._grid_service = grid
-
-    def update(self, incomming):
-        
-        if incomming[0] and incomming[1]:
-            jump_chance = self.JUMP_HEIGHT
-        elif previous_action.value & KEY_JUMP:
-            jump_chance = max(0, self._status['jump_chance'] - 1)
-        else:
-            jump_chance = 0
-
-        self._status = {
+    def update(self, incomming, jump_chance):
+        self.__status = {
             'may_jump': incomming[0],
             'on_ground': incomming[1],
             'jump_chance': jump_chance,
-            'grid': [self._grid_service.MARIO_X_POSITION,
-                     self._grid_service.MARIO_Y_POSITION]
+            'grid': [GridService.MARIO_X_POSITION,
+                     GridService.MARIO_Y_POSITION]
         }
 
-    def mutable_status(self):
-        return self._status
+    def status(self):
+        return self.__status
 
     def may_jump(self):
-        return self._status['may_jump']
+        return self.__status['may_jump']
 
     def on_ground(self):
-        return self._status['on_ground']
+        return self.__status['on_ground']
 
     def grid_position(self):
-        return self._status['grid']
+        return self.__status['grid']
 
     def jump_chance(self):
-        return self._status['jump_chance']
+        return self.__status['jump_chance']
 
     def __repr__(self):
-        return self._status.__repr__()
+        return self.__status.__repr__()
 
     def debug_info(self):
         print('\n####### Mario Status #######')
-        print('status ', self._status)
+        print('status ', self.__status)
+
 
 class EnemyStatus(GameStatus):
-
-    def __init__(self, grid):
-        self._grid_service = grid
 
     # single_enemy = {'type': EnemyType(),
     #                 'x': float(),
@@ -104,13 +93,13 @@ class EnemyStatus(GameStatus):
 
     _enemy_list = []
 
-    def update(self, incomming):
+    def update(self, incomming, grid_service):
         self._enemy_list.clear()
         enemy_data_len = len(incomming[1])
         if enemy_data_len % 3 != 0:
             raise 'enemy data error'
         for index in range(0, enemy_data_len, 3):
-            grid = self._grid_service.grid_match(
+            grid = grid_service.grid_match(
                 incomming[0], [incomming[1][index + 1], incomming[1][index + 2]])
             self._enemy_list.append({
                 'type': EnemyType(incomming[1][index]),
@@ -126,14 +115,18 @@ class EnemyStatus(GameStatus):
 
 class StatusProvider(GameStatus):
 
+    __mario_scene = MarioScene()
     __grid_service = GridService()
-    __mario_status = MarioStatus(__grid_service)
-    __enemy_status = EnemyStatus(__grid_service)
+    __mario_status = MarioStatus()
+    __enemy_status = EnemyStatus()
 
     def update(incomming):
-        StatusProvider.grid_service().update(incomming[4])
-        StatusProvider.mario_status().update([incomming[0], incomming[1], incomming[2]])
-        StatusProvider.enemy_status().update([incomming[2], incomming[3]])
+        StatusProvider.__mario_scene.parse_grid_map(incomming[4])
+        StatusProvider.__grid_service.update_grid(StatusProvider.__mario_scene)
+        StatusProvider.__mario_status.update(
+            [incomming[0], incomming[1]], StatusProvider.provide_mario_jump_chance(incomming))
+        StatusProvider.__enemy_status.update(
+            [incomming[2], incomming[3]], StatusProvider.__grid_service)
 
     def mario_status():
         return StatusProvider.__mario_status
@@ -141,18 +134,28 @@ class StatusProvider(GameStatus):
     def enemy_status():
         return StatusProvider.__enemy_status
 
+    def mario_scene():
+        return StatusProvider.__mario_scene
+
     def grid_service():
         return StatusProvider.__grid_service
 
-    def set_previous_action(action):
-        global previous_action
-        previous_action = action
-
-    def previous_action():
-        global previous_action
-        return previous_action
-
     def debug_info():
-        StatusProvider.__grid_service.debug_info()
+        StatusProvider.__grid_service.show_grid()
         StatusProvider.__mario_status.debug_info()
         StatusProvider.__enemy_status.debug_info()
+
+    __previous_action = ACTION.NONE
+
+    def update_command(action):
+        StatusProvider.__previous_action = action
+
+    def provide_mario_jump_chance(incomming):
+        jump_chance = 0
+        if incomming[0] and incomming[1]:
+            jump_chance = MarioStatus.JUMP_HEIGHT
+        elif StatusProvider.__previous_action.value & KEY_JUMP:
+            jump_chance = max(
+                0, StatusProvider.__mario_status.__status['jump_chance'] - 1)
+
+        return jump_chance

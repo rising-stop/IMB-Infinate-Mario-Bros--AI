@@ -1,6 +1,8 @@
+from mario_game.world_engine import WorldEngine
 from mcts.mcts import BaseAction
-from .mario_status import StatusProvider
-from .mario_status import ACTION
+from mario_game.mario_game import StatusProvider
+from mario_game.mario_game import ACTION
+from mario_game.mario_game import *
 import numpy
 
 
@@ -9,16 +11,36 @@ ground_action_set = (ACTION.LEFT, ACTION.RIGHT, ACTION.JUMP,
 
 air_action_set = (ACTION.LEFT, ACTION.RIGHT)
 
+class MarioState:
 
-class MarioAction(BaseAction):
+    def __init__(self, status=MarioStatus()):
+        super().__init__()
+        self.__mario_status = status
+
+    def set_status(self, status):
+        self.__mario_status = status
+
+    def is_terminal(self):
+        if StatusProvider.grid_service().is_falling_dead(self.__mario_status) or \
+                self.__mario_status.grid_position()[0] == 21:
+            return False
+        return True
+
+    def reward(self):
+        if self.__mario_status.grid_position()[0] == 21:
+            return 1.0
+        return float(self.__mario_status.grid_position()[0]) / 22.0
+
+
+class MarioAction:
 
     __action = ACTION.NONE
     __can_jump = False
 
-    def __init__(self, action):
+    def __init__(self, action, jump_chance=0):
         super().__init__()
         self.__action = action._action
-        self.__can_jump = StatusProvider.mario_status().jump_chance() != 0
+        self.__can_jump = jump_chance != 0
 
     def dimension(self):
         if self.__can_jump:

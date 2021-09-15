@@ -3,7 +3,8 @@ client/__pycache__
 experiments/__pycache__
 tasks/__pycache__
 utils/__pycache__
-mcts_mario/__pycache__
+mario_game/__pycache__
+mcts/__pycache__
 agents/.svn
 client/.svn
 experiments/.svn

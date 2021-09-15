@@ -2,8 +2,9 @@
 from os import stat
 from .tcpenvironment import TCPEnvironment
 from utils.dataadaptor import extractObservation
-from mcts_mario.mario_status import ACTION, StatusProvider
-from mcts_mario.world_engine import WorldEngine
+from mario_game.mario_game import ACTION, StatusProvider
+from mario_game.world_engine import WorldEngine
+
 
 class MarioEnvironment(TCPEnvironment):
     """ An Environment class, wrapping access to the MarioServer, 
@@ -20,6 +21,8 @@ class MarioEnvironment(TCPEnvironment):
     _reward = 0
     _status = 0
 
+    __world_env = WorldEngine()
+
     def __init__(self, is_debug=False, agentname='UnnamedClient', **otherargs):
         super(MarioEnvironment, self).__init__(agentname)
         self._is_debug = is_debug
@@ -32,7 +35,7 @@ class MarioEnvironment(TCPEnvironment):
             self._reward = ob[1]
             self._status = ob[0]
             self._finished = True
-        if  len(ob) == TCPEnvironment._numberOfObeservationValues:
+        if len(ob) == TCPEnvironment._numberOfObeservationValues:
             StatusProvider.update(ob)
             if self._is_debug:
                 StatusProvider.debug_info()
@@ -40,11 +43,13 @@ class MarioEnvironment(TCPEnvironment):
 
     def performAction(self, action):
         if not self.isFinished():
-            StatusProvider.set_previous_action(ACTION.parse_action(action))
+            StatusProvider.update_command(ACTION.parse_action(action))
             TCPEnvironment.performAction(self, action)
             if self._is_debug:
                 print('action: ', action)
-                WorldEngine.simulate(action)
+                self.__world_env.world_set(
+                    StatusProvider.mario_status(), StatusProvider.mario_scene())
+                self.__world_env.simulate(action)
             self._addReward()
             self._samples += 1
 

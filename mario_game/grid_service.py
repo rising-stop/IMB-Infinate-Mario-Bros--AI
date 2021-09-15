@@ -30,42 +30,71 @@ class EnemyType(Enum):
     KIND_FIREBALL = 25
 
 
-class GridService():
+class MarioScene():
 
-    MARIO_X_POSITION = 11
-    MARIO_Y_POSITION = 11
-    GRID_SIZE = 16
-
-    _local_scene = [[SceneType.KIND_NONE for _ in range(
+    __local_scene = [[SceneType.KIND_NONE for _ in range(
         SCENE_SIZE)] for _ in range(SCENE_SIZE)]
 
-    def update(self, incomming):
+    def __getitem__(self, index):
+        return self.__local_scene[index]
+
+    def __setitem__(self, index, value):
+        self.__local_scene[index] = value
+
+    def parse_grid_map(self, incomming):
+        close_row = 0
+        is_empty_col = True
         for row in range(SCENE_SIZE):
             for col in range(SCENE_SIZE):
                 if incomming[col][row] in SceneType._value2member_map_:
-                    self._local_scene[row][col] = SceneType(
+                    self.__local_scene[row][col] = SceneType(
                         incomming[col][row])
                 elif incomming[col][row] < 0:
-                    self._local_scene[row][col] = SceneType.KIND_UNPASSABLE
+                    is_empty_col = False
+                    self.__local_scene[row][col] = SceneType.KIND_UNPASSABLE
+            if is_empty_col:
+                close_row += 1
+        self.__shrink_active_area(close_row)
+
+    def __shrink_active_area(self, close_row):
+        for row in range(close_row):
+            for col in range(SCENE_SIZE):
+                self.__local_scene[row][col] = SceneType.KIND_UNPASSABLE
+
+
+class GridService():
+
+    def __init__(self, grid = None):
+        self.__grid = grid
+
+    MARIO_X_POSITION = 10
+    MARIO_Y_POSITION = 10
+    GRID_SIZE = 16
+
+    def update_grid(self, grid):
+        self.__grid = grid
 
     def grid_match(self, mariofloats, enemyfloats):
         return [self.MARIO_X_POSITION + round((enemyfloats[0] - mariofloats[0])/self.GRID_SIZE),
                 self.MARIO_Y_POSITION + round((enemyfloats[1] - mariofloats[1])/self.GRID_SIZE)]
 
     def is_blocked(self, status, grid_action):
-        return self._local_scene[status.grid_position()[0] +
-                                 grid_action[0]][status.grid_position()[1] +
-                                                 grid_action[1]] != SceneType.KIND_NONE
+        return self.__grid[status.grid_position()[0] +
+                           grid_action[0]][status.grid_position()[1] +
+                                           grid_action[1]] != SceneType.KIND_NONE
 
-    def debug_info(self):
+    def is_falling_dead(self, status):
+        pass
+
+    def show_grid(self):
         ret = ""
         for y in range(22):
             tmpData = ""
             for x in range(22):
-                if x == 11 and y == 11:
+                if x == self.MARIO_X_POSITION and y == self.MARIO_Y_POSITION:
                     tmpData += self.__mapElToStr(1)
                 else:
-                    tmpData += self.__mapElToStr(self._local_scene[x][y].value)
+                    tmpData += self.__mapElToStr(self.__grid[x][y].value)
             ret += "\n%s" % tmpData
         print(ret)
 
