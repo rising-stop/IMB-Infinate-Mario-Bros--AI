@@ -5,6 +5,7 @@ tasks/__pycache__
 utils/__pycache__
 mario_game/__pycache__
 mcts/__pycache__
+mario_game/scene_test_data
 agents/.svn
 client/.svn
 experiments/.svn

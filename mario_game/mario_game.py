@@ -4,6 +4,8 @@ from .grid_service import EnemyType
 from .grid_service import MarioScene
 import math
 from enum import Enum
+import json
+import os
 
 
 KEY_LEFT = 1 << 0
@@ -39,7 +41,7 @@ class GameStatus(object):
 
 class MarioStatus(GameStatus):
 
-    JUMP_HEIGHT = 3
+    JUMP_HEIGHT = 4
 
     __status = {
         'may_jump': True,
@@ -61,6 +63,9 @@ class MarioStatus(GameStatus):
 
     def status(self):
         return self.__status
+
+    def set_status(self, status):
+        self.__status = status
 
     def may_jump(self):
         return self.__status['may_jump']
@@ -115,6 +120,9 @@ class EnemyStatus(GameStatus):
 
 class StatusProvider(GameStatus):
 
+    __data_file_dir = os.getcwd() + '/mario_game/scene_test_data/'
+    __data_file_name = 'scene_data.json'
+
     __mario_scene = MarioScene()
     __grid_service = GridService()
     __mario_status = MarioStatus()
@@ -156,6 +164,24 @@ class StatusProvider(GameStatus):
             jump_chance = MarioStatus.JUMP_HEIGHT
         elif StatusProvider.__previous_action.value & KEY_JUMP:
             jump_chance = max(
-                0, StatusProvider.__mario_status.__status['jump_chance'] - 1)
+                0, StatusProvider.mario_status().jump_chance() - 1)
 
         return jump_chance
+
+    def dump_to_json():
+        out_dict = {}
+        out_dict['mario_status'] = StatusProvider.mario_status().status()
+        out_dict['grid_map'] = StatusProvider.grid_service().dump_to_array()
+        if not os.path.exists(StatusProvider.__data_file_dir):
+            os.makedirs(StatusProvider.__data_file_dir)
+        with open(StatusProvider.__data_file_dir + StatusProvider.__data_file_name, 'w') as json_file:
+            json.dump(out_dict, json_file, indent=1)
+            json_file.close()
+
+    def load_from_json():
+        with open(StatusProvider.__data_file_dir + StatusProvider.__data_file_name, 'r') as json_file:
+            data = json.load(json_file)
+            print(data['grid_map'])
+            StatusProvider.__grid_service.load_from_array(data['grid_map'])
+            StatusProvider.__mario_status.set_status(data['mario_status'])
+            json_file.close()

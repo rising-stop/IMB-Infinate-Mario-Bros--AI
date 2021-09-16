@@ -15,7 +15,7 @@ from agents.forwardrandomagent import ForwardRandomAgent
 
 def main():
     agent = ForwardAgent()
-    env = MarioEnvironment(is_debug=True, agentname=agent.getName())
+    env = MarioEnvironment(is_debug=False, agentname=agent.getName())
     exp = EpisodicExperiment(env, agent)
     print('Env Ready')
     exp.doEpisodes(1)

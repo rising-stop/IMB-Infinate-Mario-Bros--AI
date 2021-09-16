@@ -1,7 +1,7 @@
-from pynput.keyboard import Key, Listener
+from pynput.keyboard import Key, Listener, KeyCode
 import time
 from .experiment import Experiment
-
+from mario_game.mario_game import StatusProvider
 class EpisodicExperiment(Experiment):
     """ The extension of Experiment to handle episodic tasks. """
 
@@ -9,11 +9,11 @@ class EpisodicExperiment(Experiment):
 
     def __init__(self, env, agent):
         super().__init__(env, agent)
-        self._key_listener = Listener(on_press = self._key_pause)
-        self._key_listener.start()
+        self.__pause_listener = Listener(on_press = self.__key_action)
+        self.__pause_listener.start()
 
     def __del__(self):
-        self._key_listener.stop()
+        self.__pause_listener.stop()
 
     def doEpisodes(self, number=1):
         """ returns the rewards of each step as a list """
@@ -32,13 +32,11 @@ class EpisodicExperiment(Experiment):
             all_rewards.append(rewards)
         return all_rewards
 
-    def _key_pause(self, key):
+    def __key_action(self, key):
         if key == Key.space:
             self._paused = ~self._paused
-        # if self._paused:
-        #     self.env.pause_game()
-        # else:
-        #     self.env.resume_game()
+        elif key == KeyCode.from_char('s'):
+            StatusProvider.dump_to_json()
 
 # class EpisodicExperiment(Experiment):
 #    """

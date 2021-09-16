@@ -64,7 +64,7 @@ class MarioScene():
 
 class GridService():
 
-    def __init__(self, grid = None):
+    def __init__(self, grid=MarioScene()):
         self.__grid = grid
 
     MARIO_X_POSITION = 10
@@ -84,13 +84,13 @@ class GridService():
                                            grid_action[1]] != SceneType.KIND_NONE
 
     def is_falling_dead(self, status):
-        pass
+        return False
 
     def show_grid(self):
         ret = ""
-        for y in range(22):
+        for y in range(SCENE_SIZE):
             tmpData = ""
-            for x in range(22):
+            for x in range(SCENE_SIZE):
                 if x == self.MARIO_X_POSITION and y == self.MARIO_Y_POSITION:
                     tmpData += self.__mapElToStr(1)
                 else:
@@ -107,3 +107,17 @@ class GridService():
         while (len(s) < 4):
             s += "#"
         return s + " "
+
+    def dump_to_array(self):
+        out_array = []
+        for x in range(SCENE_SIZE):
+            for y in range(SCENE_SIZE):
+                out_array.append(self.__grid[x][y].value)
+        return out_array
+
+    def load_from_array(self, in_array):
+        index = 0
+        for x in range(SCENE_SIZE):
+            for y in range(SCENE_SIZE):
+                self.__grid[x][y] = SceneType(int(in_array[index]))
+                index += 1

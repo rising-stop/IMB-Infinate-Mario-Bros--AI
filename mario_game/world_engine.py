@@ -15,9 +15,11 @@ class WorldEngine:
         self.__grid_service.update_grid(mario_scene)
 
     def simulate(self, mario_status, action):
-        mario_status = self.mario_step(mario_status, ACTION.parse_action(action))
+        mario_status = self.mario_step(
+            mario_status, ACTION.parse_action(action))
         print('simuation1: ', mario_status)
-        mario_status = self.mario_step(mario_status, ACTION.parse_action(action))
+        mario_status = self.mario_step(
+            mario_status, ACTION.parse_action(action))
         print('simuation2: ', mario_status)
 
     def mario_step(self, mario_status, action):
@@ -32,10 +34,10 @@ class WorldEngine:
         # y-axis step
         if mario_status.on_ground():
             # on ground jump case
-            mario_status = self.__try_jump(action)
+            mario_status = self.__try_jump(mario_status, action)
         elif mario_status.jump_chance() != 0:
             # case 1: rising phase
-            mario_status = self.__try_jump(action)
+            mario_status = self.__try_jump(mario_status, action)
         elif mario_status.jump_chance() == 0:
             # case 2: falling phase
             if not self.__grid_service.is_blocked(mario_status, [0, 1]):
@@ -72,10 +74,11 @@ class WorldEngine:
     def __enemy_step(action):
         pass
 
+
 class SimulationProvider:
 
     __engine = WorldEngine()
-    
+
     def set_world(mario_scene):
         SimulationProvider.__engine.world_set(mario_scene)
 

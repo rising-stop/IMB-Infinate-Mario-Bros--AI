@@ -47,9 +47,8 @@ class MarioEnvironment(TCPEnvironment):
             TCPEnvironment.performAction(self, action)
             if self._is_debug:
                 print('action: ', action)
-                self.__world_env.world_set(
-                    StatusProvider.mario_status(), StatusProvider.mario_scene())
-                self.__world_env.simulate(action)
+                self.__world_env.world_set(StatusProvider.mario_scene())
+                self.__world_env.simulate(StatusProvider.mario_status(), action)
             self._addReward()
             self._samples += 1
 
