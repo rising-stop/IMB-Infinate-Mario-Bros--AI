@@ -98,13 +98,13 @@ class EnemyStatus(GameStatus):
 
     _enemy_list = []
 
-    def update(self, incomming, grid_service):
+    def update(self, incomming):
         self._enemy_list.clear()
         enemy_data_len = len(incomming[1])
         if enemy_data_len % 3 != 0:
             raise 'enemy data error'
         for index in range(0, enemy_data_len, 3):
-            grid = grid_service.grid_match(
+            grid = GridService.grid_match(
                 incomming[0], [incomming[1][index + 1], incomming[1][index + 2]])
             self._enemy_list.append({
                 'type': EnemyType(incomming[1][index]),
@@ -124,17 +124,16 @@ class StatusProvider(GameStatus):
     __data_file_name = 'scene_data.json'
 
     __mario_scene = MarioScene()
-    __grid_service = GridService()
     __mario_status = MarioStatus()
     __enemy_status = EnemyStatus()
 
     def update(incomming):
         StatusProvider.__mario_scene.parse_grid_map(incomming[4])
-        StatusProvider.__grid_service.update_grid(StatusProvider.__mario_scene)
+        GridService.update_grid(StatusProvider.__mario_scene)
         StatusProvider.__mario_status.update(
             [incomming[0], incomming[1]], StatusProvider.provide_mario_jump_chance(incomming))
         StatusProvider.__enemy_status.update(
-            [incomming[2], incomming[3]], StatusProvider.__grid_service)
+            [incomming[2], incomming[3]])
 
     def mario_status():
         return StatusProvider.__mario_status
@@ -145,11 +144,8 @@ class StatusProvider(GameStatus):
     def mario_scene():
         return StatusProvider.__mario_scene
 
-    def grid_service():
-        return StatusProvider.__grid_service
-
     def debug_info():
-        StatusProvider.__grid_service.show_grid()
+        GridService.show_grid()
         StatusProvider.__mario_status.debug_info()
         StatusProvider.__enemy_status.debug_info()
 
@@ -171,7 +167,7 @@ class StatusProvider(GameStatus):
     def dump_to_json():
         out_dict = {}
         out_dict['mario_status'] = StatusProvider.mario_status().status()
-        out_dict['grid_map'] = StatusProvider.grid_service().dump_to_array()
+        out_dict['grid_map'] = GridService.dump_to_array()
         if not os.path.exists(StatusProvider.__data_file_dir):
             os.makedirs(StatusProvider.__data_file_dir)
         with open(StatusProvider.__data_file_dir + StatusProvider.__data_file_name, 'w') as json_file:
@@ -181,7 +177,6 @@ class StatusProvider(GameStatus):
     def load_from_json():
         with open(StatusProvider.__data_file_dir + StatusProvider.__data_file_name, 'r') as json_file:
             data = json.load(json_file)
-            print(data['grid_map'])
-            StatusProvider.__grid_service.load_from_array(data['grid_map'])
+            GridService.load_from_array(data['grid_map'])
             StatusProvider.__mario_status.set_status(data['mario_status'])
             json_file.close()

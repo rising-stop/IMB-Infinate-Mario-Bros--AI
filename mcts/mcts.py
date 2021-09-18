@@ -3,16 +3,26 @@ from .mario_action import *
 from mario_game.world_engine import *
 
 
+class VisableNode:
+    node_size = 1
+    default_interval = 1
+    scale = 0.1
+
+    def __init__(self, id):
+        self.id = id
+        self.node_interval = []
+        self.total_width = VisableNode.node_size
+
+
 class Node:
 
-    __childs = []
-
-    def __init__(self, state, action, parent=None):
+    def __init__(self, state, action, parent):
         self.__visits = 1
         self.__reward = 0.0
         self.__action = action
         self.__parent = parent
         self.__state = state
+        self.__childs = []
 
     def parent(self):
         return self.__parent
@@ -37,6 +47,9 @@ class Node:
 
     def evalue(self):
         raise 'Not implement'
+
+    def childs(self):
+        return self.__childs
 
 
 class MCTS:

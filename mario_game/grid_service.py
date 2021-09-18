@@ -1,4 +1,5 @@
 from enum import Enum
+from utils.tree_drawer import TreeDrawer
 
 SCENE_SIZE = 22
 
@@ -34,12 +35,22 @@ class MarioScene():
 
     __local_scene = [[SceneType.KIND_NONE for _ in range(
         SCENE_SIZE)] for _ in range(SCENE_SIZE)]
+    __path = []
 
     def __getitem__(self, index):
         return self.__local_scene[index]
 
     def __setitem__(self, index, value):
         self.__local_scene[index] = value
+
+    def clear_path(self):
+        self.__path.clear()
+
+    def add_path_point(self, point):
+        self.__path.append((point[0], point[1]))
+
+    def path(self):
+        return self.__path
 
     def parse_grid_map(self, incomming):
         close_row = 0
@@ -64,41 +75,75 @@ class MarioScene():
 
 class GridService():
 
-    def __init__(self, grid=MarioScene()):
-        self.__grid = grid
+    __grid = MarioScene()
+    __saver_level = []
 
     MARIO_X_POSITION = 10
     MARIO_Y_POSITION = 10
     GRID_SIZE = 16
 
-    def update_grid(self, grid):
-        self.__grid = grid
+    def update_grid(grid):
+        GridService.__grid = grid
+        GridService.cal_saver_level()
 
-    def grid_match(self, mariofloats, enemyfloats):
-        return [self.MARIO_X_POSITION + round((enemyfloats[0] - mariofloats[0])/self.GRID_SIZE),
-                self.MARIO_Y_POSITION + round((enemyfloats[1] - mariofloats[1])/self.GRID_SIZE)]
+    def cal_saver_level():
+        for x in range(SCENE_SIZE):
+            is_meet_ground = False
+            for reverse_y in range(SCENE_SIZE):
+                y = SCENE_SIZE - reverse_y - 1
+                if (not is_meet_ground) and \
+                        GridService.__grid[x][y] == SceneType.KIND_UNPASSABLE:
+                    is_meet_ground = True
+                if is_meet_ground and \
+                        GridService.__grid[x][y] != SceneType.KIND_UNPASSABLE:
+                    GridService.__saver_level.append(y + 1)
+                    break
+            if len(GridService.__saver_level) != x + 1:
+                GridService.__saver_level.append(SCENE_SIZE - 1)
 
-    def is_blocked(self, status, grid_action):
-        return self.__grid[status.grid_position()[0] +
-                           grid_action[0]][status.grid_position()[1] +
-                                           grid_action[1]] != SceneType.KIND_NONE
+    def grid_match(mariofloats, enemyfloats):
+        return [GridService.MARIO_X_POSITION + round((enemyfloats[0] - mariofloats[0])/GridService.GRID_SIZE),
+                GridService.MARIO_Y_POSITION + round((enemyfloats[1] - mariofloats[1])/GridService.GRID_SIZE)]
 
-    def is_falling_dead(self, status):
+    def is_blocked(status, grid_action):
+        if (status.grid_position()[0] + grid_action[0]) >= SCENE_SIZE or \
+            (status.grid_position()[0] + grid_action[0]) < 0 or \
+            (status.grid_position()[1] + grid_action[1]) >= SCENE_SIZE or \
+                (status.grid_position()[1] + grid_action[1]) < 0:
+            return True
+        return GridService.__grid[status.grid_position()[0] +
+                                  grid_action[0]][status.grid_position()[1] +
+                                                  grid_action[1]] != SceneType.KIND_NONE
+
+    def is_falling_dead(status):
+        if status.on_ground() or status.jump_chance() != 0:
+            return False
+        pos = status.grid_position()
+        for future_x in range(pos[0], SCENE_SIZE):
+            if pos[1] >= GridService.__saver_level[pos[0]]:
+                return True
+            pos[0] = future_x
+            pos[1] += 1
+            if pos[1] >= SCENE_SIZE:
+                break
         return False
 
-    def show_grid(self):
+    def show_grid():
         ret = ""
         for y in range(SCENE_SIZE):
             tmpData = ""
             for x in range(SCENE_SIZE):
-                if x == self.MARIO_X_POSITION and y == self.MARIO_Y_POSITION:
-                    tmpData += self.__mapElToStr(1)
+                if x == GridService.MARIO_X_POSITION and y == GridService.MARIO_Y_POSITION:
+                    tmpData += GridService.__mapElToStr(1)
+                elif (x, y) in GridService.__grid.path():
+                    tmpData += GridService.__mapElToStr('****')
                 else:
-                    tmpData += self.__mapElToStr(self.__grid[x][y].value)
+                    tmpData += GridService.__mapElToStr(
+                        GridService.__grid[x][y].value)
             ret += "\n%s" % tmpData
         print(ret)
 
-    def __mapElToStr(self, el):
+    def __mapElToStr(el):
         """maps element of levelScene to str representation"""
         s = ""
         if (el == 0):
@@ -108,16 +153,16 @@ class GridService():
             s += "#"
         return s + " "
 
-    def dump_to_array(self):
+    def dump_to_array():
         out_array = []
         for x in range(SCENE_SIZE):
             for y in range(SCENE_SIZE):
-                out_array.append(self.__grid[x][y].value)
+                out_array.append(GridService.__grid[x][y].value)
         return out_array
 
-    def load_from_array(self, in_array):
+    def load_from_array(in_array):
         index = 0
         for x in range(SCENE_SIZE):
             for y in range(SCENE_SIZE):
-                self.__grid[x][y] = SceneType(int(in_array[index]))
+                GridService.__grid[x][y] = SceneType(int(in_array[index]))
                 index += 1
