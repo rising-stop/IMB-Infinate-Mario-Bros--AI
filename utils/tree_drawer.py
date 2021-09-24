@@ -1,4 +1,3 @@
-from mario_game.mario_game import StatusProvider
 from utils.utils import random_ID
 import networkx as nx
 import matplotlib.pyplot as plt

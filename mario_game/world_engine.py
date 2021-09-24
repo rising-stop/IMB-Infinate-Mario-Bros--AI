@@ -12,25 +12,26 @@ class WorldEngine:
         GridService.update_grid(mario_scene)
 
     def mario_step(self, mario_status, action):
-        # x-axis step
-        if action == ACTION.LEFT or action == ACTION.JUMP_LEFT:
-            if GridService.is_blocked(mario_status, [1, 0]):
-                mario_status.grid_position()[0] += 1
-        if action == ACTION.RIGHT or action == ACTION.JUMP_RIGHT:
-            if not GridService.is_blocked(mario_status, [-1, 0]):
-                mario_status.grid_position()[0] -= 1
-
-        # y-axis step
+        # case 1: on ground:
         if mario_status.on_ground():
-            # on ground jump case
+            # x-axis step
+            mario_status = self.__try_move(mario_status, action)
+            # y-axis step
             mario_status = self.__try_jump(mario_status, action)
-        elif mario_status.jump_chance() != 0:
-            # case 1: rising phase
-            mario_status = self.__try_jump(mario_status, action)
-        elif mario_status.jump_chance() == 0:
-            # case 2: falling phase
             if not GridService.is_blocked(mario_status, [0, 1]):
-                mario_status.grid_position()[1] += 1
+                mario_status.status()['jump_chance'] = 0
+        # case 2: not on ground:
+        else:
+            # x-axis step
+            mario_status = self.__try_move(mario_status, action)
+            # y-axis step
+            if mario_status.jump_chance() != 0:
+                # case 1: rising phase
+                mario_status = self.__try_jump(mario_status, action)
+            elif mario_status.jump_chance() == 0:
+                # case 2: falling phase
+                if not GridService.is_blocked(mario_status, [0, 1]):
+                    mario_status.grid_position()[1] += 1
 
         # status update
         if GridService.is_blocked(mario_status, [0, 1]):
@@ -43,21 +44,34 @@ class WorldEngine:
             mario_status.status()['on_ground'] = False
         return mario_status
 
+    def __try_move(self, mario_status, action):
+        if action in (ACTION.LEFT, ACTION.RIGHT, ACTION.JUMP_LEFT, ACTION.JUMP_RIGHT):
+            if action == ACTION.LEFT or action == ACTION.JUMP_LEFT:
+                if not GridService.is_blocked(mario_status, [1, 0]):
+                    mario_status.grid_position()[0] += 1
+            if action == ACTION.RIGHT or action == ACTION.JUMP_RIGHT:
+                if not GridService.is_blocked(mario_status, [-1, 0]):
+                    mario_status.grid_position()[0] -= 1
+        return mario_status
+
     def __try_jump(self, mario_status, action):
-        if action == ACTION.JUMP:
-            if not GridService.is_blocked(mario_status, [0, -1]):
-                mario_status.grid_position()[1] -= 1
-                mario_status.status()['jump_chance'] -= 1
-        elif action == ACTION.JUMP_LEFT:
-            if not GridService.is_blocked(mario_status, [1, -1]):
-                mario_status.grid_position()[1] -= 1
-                mario_status.status()['jump_chance'] -= 1
-        elif action == ACTION.JUMP_RIGHT:
-            if not GridService.is_blocked(mario_status, [-1, -1]):
-                mario_status.grid_position()[1] -= 1
-                mario_status.status()['jump_chance'] -= 1
-        else:
-            mario_status.status()['jump_chance'] = 0
+        if action in (ACTION.JUMP, ACTION.JUMP_LEFT, ACTION.JUMP_RIGHT):
+            if action == ACTION.JUMP:
+                if not GridService.is_blocked(mario_status, [0, -1]):
+                    mario_status.grid_position()[1] -= 1
+            elif action == ACTION.JUMP_LEFT:
+                if not GridService.is_blocked(mario_status, [1, -1]):
+                    mario_status.grid_position()[1] -= 1
+            elif action == ACTION.JUMP_RIGHT:
+                if not GridService.is_blocked(mario_status, [-1, -1]):
+                    mario_status.grid_position()[1] -= 1
+            else:
+                pass
+            if GridService.is_blocked(mario_status, [-1, 0]):
+                mario_status.status()['jump_chance'] = 0
+            else:
+                mario_status.status()['jump_chance'] = max(
+                    mario_status.status()['jump_chance'] - 1, 0)
         return mario_status
 
     def __enemy_step(action):

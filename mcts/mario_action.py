@@ -82,3 +82,6 @@ class MarioState:
         if self.__mario_status.jump_chance() != 0:
             return ground_action_set
         return air_action_set
+
+    def __repr__(self) -> str:
+        return self.__mario_status.__repr__()

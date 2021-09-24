@@ -1,5 +1,4 @@
 import time
-from mario_game.mario_game import StatusProvider
 import networkx as nx
 import matplotlib.pyplot as plt
 import random

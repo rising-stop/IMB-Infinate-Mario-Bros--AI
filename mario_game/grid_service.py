@@ -87,6 +87,7 @@ class GridService():
         GridService.cal_saver_level()
 
     def cal_saver_level():
+        GridService.__saver_level = []
         for x in range(SCENE_SIZE):
             is_meet_ground = False
             for reverse_y in range(SCENE_SIZE):
@@ -99,7 +100,7 @@ class GridService():
                     GridService.__saver_level.append(y + 1)
                     break
             if len(GridService.__saver_level) != x + 1:
-                GridService.__saver_level.append(SCENE_SIZE - 1)
+                GridService.__saver_level.append(0)
 
     def grid_match(mariofloats, enemyfloats):
         return [GridService.MARIO_X_POSITION + round((enemyfloats[0] - mariofloats[0])/GridService.GRID_SIZE),
@@ -120,13 +121,13 @@ class GridService():
             return False
         pos = status.grid_position()
         for future_x in range(pos[0], SCENE_SIZE):
-            if pos[1] >= GridService.__saver_level[pos[0]]:
-                return True
             pos[0] = future_x
+            if pos[1] < GridService.__saver_level[pos[0]]:
+                return False
             pos[1] += 1
             if pos[1] >= SCENE_SIZE:
                 break
-        return False
+        return True
 
     def show_grid():
         ret = ""
